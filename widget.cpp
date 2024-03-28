@@ -7,6 +7,8 @@
 #include <QIODevice>
 #include <QAudio>
 
+#include "rtc/rtc.h"
+
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
@@ -21,41 +23,15 @@ Widget::~Widget()
 
 void Widget::on_play_button_clicked()
 {
-    static QMediaPlayer *player = new QMediaPlayer;
-    static QAudioOutput *audioOutput = new QAudioOutput;
+    // rtc::Configuration config;
+    // config.iceServers.emplace_back("mystunserver.org:3478");
 
-    if (!player->hasAudio())
-    {
-        player->setAudioOutput(audioOutput);
-        player->setSource(QUrl::fromLocalFile("/home/arian/Desktop/samplein.wav"));
-        audioOutput->setVolume(50);
-    }
-
-    if (!player->isPlaying())
-    {
-        player->play();
-    }
-    else
-    {
-        player->pause();
-    }
+    // rtc::PeerConnection pc(config);
 }
 
 
 void Widget::on_pushButton_clicked()
 {
-    QMediaCaptureSession* session = new QMediaCaptureSession();
-    QAudioInput* audioInput = new QAudioInput();
-    QMediaRecorder* recorder = new QMediaRecorder();
-    session->setAudioInput(audioInput);
-    session->setRecorder(recorder);
-    recorder->setMediaFormat(QMediaFormat::Wave);
-    recorder->setOutputLocation(QUrl::fromLocalFile("/home/arian/Desktop/samplein"));
-    recorder->setAudioSampleRate(48000);
-    recorder->setAudioChannelCount(1);
-    recorder->record();
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), recorder, SLOT(stop()));
-    timer->start(5000);
+
 }
 

@@ -24,5 +24,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 
-INCLUDEPATH += /home/arian/Downloads/boost_1_84_0
+INCLUDEPATH += /home/arian/Downloads/boost_1_84_0 /home/arian/Documents/libdatachannel/include
 LIBS += -L/home/arian/Downloads/boost_1_84_0/stage/mingw-x64/lib
+LIBS += -L/home/arian/Documents/libdatachannel/build -ldatachannel
+LIBS += -L/home/arian/Qt/Tools/OpenSSLv3/src/util -lcrypto -lssl
