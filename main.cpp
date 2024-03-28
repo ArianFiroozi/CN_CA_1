@@ -66,11 +66,6 @@ int main(int argc, char *argv[])
     shared_ptr<rtc::DataChannel> dc = pc.createDataChannel("test");
     logDc(dc, 1);
 
-    // pc.onDataChannel([&dc](shared_ptr<rtc::DataChannel> incoming) {
-    //     dc = incoming;
-    //     dc->send("Hello world!");
-    // });
-
     /// pc1 ///////////////////////////////////
 
     rtc::PeerConnection pc2(config);
@@ -87,20 +82,19 @@ int main(int argc, char *argv[])
     pc2.setRemoteDescription(d);
 
     shared_ptr<rtc::DataChannel> dc2 = pc2.createDataChannel("test2");
-    // logDc(dc2, 2);
+    logDc(dc2, 2);
 
-    pc2.onDataChannel([&dc2](shared_ptr<rtc::DataChannel> incoming) {
-        dc2 = incoming;
-        dc2->send("Hello world!");
+    pc2.onDataChannel([](shared_ptr<rtc::DataChannel> incoming) {
+        incoming->send("Hello from2!");
     });
 
     pc2.setLocalDescription(rtc::Description::Type::Offer); //?
 
     pc.setRemoteDescription(pc2.localDescription().value().generateSdp());
 
-    // rtc::Description::Media m("hello", "mid");
-    // pc.addTrack(m);
-    // rtcSendMessage(1, "hello fuckers", 100);
+    pc.onDataChannel([](shared_ptr<rtc::DataChannel> incoming) {
+        incoming->send("Hello from1!");
+    });
 
     w.show();
     return a.exec();
