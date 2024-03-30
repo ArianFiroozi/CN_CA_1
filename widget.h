@@ -2,6 +2,7 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include "Peer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -14,6 +15,7 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
+    Peer* peer;
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
@@ -21,6 +23,12 @@ private slots:
     void on_play_button_clicked();
 
     void on_pushButton_clicked();
+
+    void on_textEdit_textChanged();
+
+    void on_pushButton_2_clicked();
+
+    void on_pushButton_3_clicked();
 
 private:
     Ui::Widget *ui;

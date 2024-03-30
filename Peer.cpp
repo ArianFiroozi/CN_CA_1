@@ -5,6 +5,7 @@
 #include "rtc/description.hpp"
 #include "rtc/datachannel.hpp"
 #include "Peer.h"
+#include "widget.h"
 
 using namespace std;
 

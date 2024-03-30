@@ -13,7 +13,6 @@ class Peer{
 private:
     int id;
     rtc::Configuration config;
-    shared_ptr<rtc::DataChannel> dc;
     shared_ptr<rtc::DataChannel> incomingDc;
     int state;
 
@@ -21,6 +20,7 @@ private:
     void logDc(shared_ptr<rtc::DataChannel> dc, int id);
 
 public:
+    shared_ptr<rtc::DataChannel> dc;
     rtc::PeerConnection* pc;
     Peer(int _id);
     void printLog();
