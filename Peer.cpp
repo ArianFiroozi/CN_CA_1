@@ -5,7 +5,6 @@
 #include "rtc/description.hpp"
 #include "rtc/datachannel.hpp"
 #include "Peer.h"
-#include "widget.h"
 
 using namespace std;
 
@@ -74,6 +73,35 @@ void Peer::createDataChannel(std::string name)
         incomingDc = incoming;
         incomingDc->send(to_string(id) + " is connected");
     });
+
+    pc->onTrack([this](std::shared_ptr<rtc::Track> rec_track){
+        // rtc::Track foo;
+        // foo.receive()
+
+        auto session = std::make_shared<rtc::RtcpReceivingSession>();
+        rec_track->setMediaHandler(session);
+
+        cout<<id<<" got track "<<rec_track->isOpen()<<endl;
+        receive_track = rec_track;
+        cout<<rec_track->description().generateSdp();
+
+        rec_track->onOpen([this]() {
+            cout<<"track opened: "<<receive_track->direction()<<endl;
+        });
+
+
+        rec_track->onMessage(
+            [this](rtc::binary message) {
+                cout<<"msgbin"<<endl;
+                cout<< reinterpret_cast<const char *>(message.data())<<endl;
+            },
+            [](rtc::string msg){
+                cout<<"msg"<<endl;
+            });
+
+    });
+
+
 }
 
 void Peer::sendMsg(std::string msg)

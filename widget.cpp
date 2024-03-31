@@ -16,6 +16,15 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     peer = new Peer(1);
+    buffer = new QBuffer();
+
+    cout<<"buffer opened:"<<buffer->open(QIODevice::ReadWrite)<<endl;
+    QAudioFormat format;
+    format.setSampleRate(8000);
+    format.setChannelCount(1);
+    format.setSampleFormat(QAudioFormat::UInt8);
+    source = new QAudioSource(format, this);
+
     ui->setupUi(this);
 }
 
@@ -25,19 +34,58 @@ Widget::~Widget()
 }
 
 
-void Widget::on_pushButton_clicked()
+void Widget::on_show_sdp_clicked()
 {
+
+    if (ui->sender_radio->isChecked()){
+    const rtc::SSRC ssrc = 42;
+        rtc::Description::Audio media("audio", rtc::Description::Direction::SendRecv);
+    media.addSSRC(ssrc, "audio-send");
+
+    peer->send_track = peer->pc->addTrack(media);
+    peer->send_track->onOpen([]() {
+        cout<<"send track opened"<<endl;
+    });
+
+    peer->send_track->onOpen([this](){
+        cout<<"send track is open, trying to send smth"<<endl;
+        peer->send_track->send("daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    });
+
+
+    peer->send_track->onMessage([](std::variant<rtc::binary, rtc::string> message) {
+        cout<<"received from send!"<<endl;
+    });
+
+    }
+
+
     peer->createDataChannel("mydc");
     peer->setLocalToOffer();
+
+    if (ui->receiver_radio->isChecked()){ ////?
+        const rtc::SSRC ssrc = 42;
+        rtc::Description::Audio rec_media("audio", rtc::Description::Direction::SendRecv);
+        rec_media.addSSRC(ssrc, "audio-receive");
+
+        peer->send_track = peer->pc->addTrack(rec_media);
+        auto session = std::make_shared<rtc::RtcpReceivingSession>();
+        peer->send_track->setMediaHandler(session);
+
+        // peer->receive_track->onMessage([this] (std::variant<rtc::binary, rtc::string> message) {
+        //     cout<<"i got msg"<<endl;
+        //     if (std::holds_alternative<rtc::binary>(message)) {
+        //         rtc::binary binaryMessage = std::get<rtc::binary>(message);
+        //         QByteArray audioData(reinterpret_cast<char*>(binaryMessage.data()), binaryMessage.size());
+
+        //         buffer->write(audioData);
+        //     }
+        // });
+    }
 
     string mySdp = peer->getSdp();
     ui->textBrowser->setText(QString::fromUtf8(mySdp.c_str()));
     peer->printLog();
-}
-
-void Widget::on_play_button_clicked()
-{
-
 }
 
 
@@ -46,19 +94,64 @@ void Widget::on_textEdit_textChanged()
 }
 
 
-void Widget::on_pushButton_2_clicked()
+void Widget::on_connect_peer_clicked()
 {
     peer->setRemoteDescription(ui->textEdit->toPlainText().toStdString());
 }
 
-void Widget::on_pushButton_3_clicked()
+void Widget::on_send_text_clicked()
 {
-    peer->dc->onMessage([this](std::variant<rtc::binary, rtc::string> message) {
-        if (std::holds_alternative<rtc::string>(message)) {
-            string msgStr = get<rtc::string>(message);
-            ui->textEdit->setText(QString::fromUtf8(msgStr.c_str()));
-        }
-    });
+    // peer->dc->onMessage([this](std::variant<rtc::binary, rtc::string> message) {
+    //     if (std::holds_alternative<rtc::string>(message)) {
+    //         string msgStr = get<rtc::string>(message);
+    //         ui->textEdit->setText(QString::fromUtf8(msgStr.c_str()));
+    //     }
+    // });
 
     peer->sendMsg(ui->textEdit_2->toPlainText().toStdString());
 }
+
+void Widget::on_send_audio_clicked()
+{
+    if (ui->sender_radio->isChecked()){
+
+        cout<<"buffer opened:"<<buffer->open(QIODevice::ReadWrite)<<endl;
+        QAudioFormat format;
+        format.setSampleRate(8000);
+        format.setChannelCount(1);
+        format.setSampleFormat(QAudioFormat::UInt8);
+        source = new QAudioSource(format, this);
+        source->start(buffer);
+
+        // source->start(buffer);
+        // cout<<buffer->readAll().toStdString()<<endl;
+        QByteArray audioData = buffer->readAll();
+        if (!audioData.isEmpty()) {
+            cout<<"sending audio!"<<audioData.size()<<endl;
+            std::string rtpPacket(audioData.begin(), audioData.end());
+
+            if (peer->send_track->isOpen())
+                cout<<"send is:"<<peer->send_track->send(std::move(rtpPacket));
+            else
+                cout<<"track not open"<<endl;
+        }
+    }
+    else{
+        // rtc::Description::Audio media("audio", rtc::Description::Direction::RecvOnly);
+
+        // peer->receive_track = peer->pc->addTrack(media);
+        // auto session = std::make_shared<rtc::RtcpReceivingSession>();
+        // peer->receive_track->setMediaHandler(session);
+
+        // peer->receive_track->onMessage([this] (std::variant<rtc::binary, rtc::string> message) {
+        //     cout<<"i got msg"<<endl;
+        //     if (std::holds_alternative<rtc::binary>(message)) {
+        //         rtc::binary binaryMessage = std::get<rtc::binary>(message);
+        //         QByteArray audioData(reinterpret_cast<char*>(binaryMessage.data()), binaryMessage.size());
+
+        //         buffer->write(audioData);
+        //     }
+        // });
+    }
+}
+
