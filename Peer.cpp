@@ -81,9 +81,6 @@ void Peer::createDataChannel(std::string name)
     });
 
     pc->onTrack([this](std::shared_ptr<rtc::Track> rec_track){
-        // rtc::Track foo;
-        // foo.description().generateSdp()
-
         auto session = std::make_shared<rtc::RtcpReceivingSession>();
         rec_track->setMediaHandler(session);
         rtc::Description::Media desc = rec_track->description();
