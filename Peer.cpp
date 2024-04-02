@@ -35,6 +35,10 @@ void Peer::logPc(rtc::PeerConnection *pc, int id)
     pc->onLocalCandidate([pc](rtc::Candidate candidate) {
         pc->addRemoteCandidate(rtc::Candidate(candidate.candidate(), candidate.mid()));
     });
+
+    pc->onIceStateChange([pc, id](rtc::PeerConnection::IceState iceState){
+        std::cout<< id << " ice state changed: " << iceState << endl;
+    });
 }
 
 void Peer::logDc(shared_ptr<rtc::DataChannel> dc, int id)
@@ -44,9 +48,10 @@ void Peer::logDc(shared_ptr<rtc::DataChannel> dc, int id)
         state = 1; //shouldn't be here
     });
 
-    dc->onMessage([id](std::variant<rtc::binary, rtc::string> message) {
+    dc->onMessage([id,this](std::variant<rtc::binary, rtc::string> message) {
         if (std::holds_alternative<rtc::string>(message)) {
             std::cout << id << " message received: " << get<rtc::string>(message) << std::endl;
+            last_received_msg = get<rtc::string>(message);
         }
     });
 }
@@ -57,6 +62,7 @@ Peer::Peer(int _id)
     state = 0; //TODO enum
     config.iceServers.emplace_back("stun:stun.l.google.com:19302");
     pc = new rtc::PeerConnection(config);
+    last_received_msg = "place holder";
 }
 
 void Peer::printLog()
@@ -89,23 +95,20 @@ void Peer::createDataChannel(std::string name)
         rec_track = this->pc->addTrack(desc);
 
         receive_track = rec_track;
-        rec_track->onOpen([this]() {
+
+        receive_track->onOpen([this]() {
             cout<<"track opened: "<<receive_track->direction()<<endl;
         });
 
-
-        rec_track->onMessage(
+        receive_track->onMessage(
             [this](rtc::binary message) {
                 cout<<"msgbin"<<endl;
                 cout<< reinterpret_cast<const char *>(message.data())<<endl;
             },
             [](rtc::string msg){
-                cout<<"msg"<<endl;
+                cout<<"msgstr: "<<msg<<endl;
             });
-
-    });
-
-
+    });   
 }
 
 void Peer::sendMsg(std::string msg)

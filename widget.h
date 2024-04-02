@@ -36,6 +36,8 @@ private slots:
 
     void on_send_audio_clicked();
 
+    void on_show_text_message_clicked();
+
 private:
     Ui::Widget *ui;
 };

@@ -20,6 +20,8 @@ private:
     void logDc(shared_ptr<rtc::DataChannel> dc, int id);
 
 public:
+    string last_received_msg;
+
     shared_ptr<rtc::DataChannel> dc;
     rtc::PeerConnection* pc;
     std::shared_ptr<rtc::Track> send_track;
