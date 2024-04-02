@@ -38,24 +38,44 @@ void Widget::on_show_sdp_clicked()
 {
 
     if (ui->sender_radio->isChecked()){
-    const rtc::SSRC ssrc = 42;
+        const rtc::SSRC ssrc = 42;
         rtc::Description::Audio media("audio", rtc::Description::Direction::SendRecv);
-    media.addSSRC(ssrc, "audio-send");
+        media.addSSRC(ssrc, "audio-send");
 
-    peer->send_track = peer->pc->addTrack(media);
-    peer->send_track->onOpen([]() {
-        cout<<"send track opened"<<endl;
-    });
+        peer->send_track = peer->pc->addTrack(media);
+        peer->send_track->onOpen([]() {
+            cout<<"send track opened"<<endl;
+        });
 
-    peer->send_track->onOpen([this](){
-        cout<<"send track is open, trying to send smth"<<endl;
-        peer->send_track->send("daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    });
+        peer->send_track->onOpen([this](){
+            cout<<"send track is open, trying to send smth"<<endl;
+            peer->send_track->send("daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        });
 
 
-    peer->send_track->onMessage([](std::variant<rtc::binary, rtc::string> message) {
-        cout<<"received from send!"<<endl;
-    });
+        peer->send_track->onMessage([](std::variant<rtc::binary, rtc::string> message) {
+            cout<<"received from send!"<<endl;
+        });
+        /////
+        rtc::Description::Audio rec_media("audio", rtc::Description::Direction::SendRecv);
+        rec_media.addSSRC(ssrc, "audio-rec");
+
+        peer->receive_track = peer->pc->addTrack(rec_media);
+        peer->receive_track->onOpen([]() {
+            cout<<"rec track opened"<<endl;
+        });
+
+        peer->receive_track->onOpen([this](){
+            cout<<"rec track is open, trying to send smth"<<endl;
+            peer->receive_track->send("daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        });
+
+
+        peer->receive_track->onMessage([](std::variant<rtc::binary, rtc::string> message) {
+            cout<<"received from rec!"<<endl;
+            // cout<<get<rtc::string>(message)<<endl;
+        });
+
 
     }
 
@@ -72,6 +92,7 @@ void Widget::on_show_sdp_clicked()
         auto session = std::make_shared<rtc::RtcpReceivingSession>();
         peer->send_track->setMediaHandler(session);
 
+        // peer->send_track->send("SRGGGEWrgwermmmmmmmmmmmmmmmmmmmmmmmmmmgergr");
         // peer->receive_track->onMessage([this] (std::variant<rtc::binary, rtc::string> message) {
         //     cout<<"i got msg"<<endl;
         //     if (std::holds_alternative<rtc::binary>(message)) {
@@ -113,7 +134,7 @@ void Widget::on_send_text_clicked()
 
 void Widget::on_send_audio_clicked()
 {
-    if (ui->sender_radio->isChecked()){
+    if (ui->sender_radio->isChecked() || true){
 
         cout<<"buffer opened:"<<buffer->open(QIODevice::ReadWrite)<<endl;
         QAudioFormat format;

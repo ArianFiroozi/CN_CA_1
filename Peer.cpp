@@ -76,15 +76,19 @@ void Peer::createDataChannel(std::string name)
 
     pc->onTrack([this](std::shared_ptr<rtc::Track> rec_track){
         // rtc::Track foo;
-        // foo.receive()
+        // foo.description().generateSdp()
 
         auto session = std::make_shared<rtc::RtcpReceivingSession>();
         rec_track->setMediaHandler(session);
+        rtc::Description::Media desc = rec_track->description();
+        desc.setDirection(rtc::Description::Direction::SendRecv);
 
         cout<<id<<" got track "<<rec_track->isOpen()<<endl;
-        receive_track = rec_track;
-        cout<<rec_track->description().generateSdp();
 
+        cout<<rec_track->description().generateSdp();
+        rec_track = this->pc->addTrack(desc);
+
+        receive_track = rec_track;
         rec_track->onOpen([this]() {
             cout<<"track opened: "<<receive_track->direction()<<endl;
         });
