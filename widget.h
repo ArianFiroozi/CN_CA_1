@@ -28,15 +28,11 @@ public:
 private slots:
     void on_show_sdp_clicked();
 
-    void on_textEdit_textChanged();
-
     void on_connect_peer_clicked();
 
     void on_send_text_clicked();
 
     void on_send_audio_clicked();
-
-    void on_show_text_message_clicked();
 
 private:
     Ui::Widget *ui;

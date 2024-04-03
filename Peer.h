@@ -7,9 +7,16 @@
 #include "rtc/description.hpp"
 #include "rtc/datachannel.hpp"
 
+#include "QObject"
+
 using namespace std;
 
-class Peer{
+class Peer: public QObject{
+    Q_OBJECT
+
+signals:
+    void variableChanged(const QString& newValue);
+
 private:
     int id;
     rtc::Configuration config;
@@ -20,14 +27,14 @@ private:
     void logDc(shared_ptr<rtc::DataChannel> dc, int id);
 
 public:
-    string last_received_msg;
-
     shared_ptr<rtc::DataChannel> dc;
     rtc::PeerConnection* pc;
     std::shared_ptr<rtc::Track> send_track;
     std::shared_ptr<rtc::Track> receive_track;
 
-    Peer(int _id);
+    Peer(int _id, QObject *parent = Q_NULLPTR);
+    ~Peer();
+
     void printLog();
     void createDataChannel(std::string name);
     void sendMsg(std::string msg);

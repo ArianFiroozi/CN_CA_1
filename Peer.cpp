@@ -51,19 +51,21 @@ void Peer::logDc(shared_ptr<rtc::DataChannel> dc, int id)
     dc->onMessage([id,this](std::variant<rtc::binary, rtc::string> message) {
         if (std::holds_alternative<rtc::string>(message)) {
             std::cout << id << " message received: " << get<rtc::string>(message) << std::endl;
-            last_received_msg = get<rtc::string>(message);
+            emit variableChanged(QString::fromStdString(get<rtc::string>(message)));
         }
     });
 }
 
-Peer::Peer(int _id)
+Peer::Peer(int _id, QObject *parent) : QObject(parent)
 {
     id = _id;
     state = 0; //TODO enum
     config.iceServers.emplace_back("stun:stun.l.google.com:19302");
     pc = new rtc::PeerConnection(config);
-    last_received_msg = "place holder";
 }
+
+Peer::~Peer()
+{}
 
 void Peer::printLog()
 {

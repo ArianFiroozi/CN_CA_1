@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>660</width>
-    <height>644</height>
+    <height>550</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,9 +16,9 @@
   <widget class="QTextEdit" name="textEdit">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>50</x>
      <y>40</y>
-     <width>291</width>
+     <width>271</width>
      <height>161</height>
     </rect>
    </property>
@@ -129,23 +129,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>410</y>
+     <y>400</y>
      <width>271</width>
      <height>101</height>
     </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="show_text_message">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>520</y>
-     <width>271</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>show last message</string>
    </property>
   </widget>
  </widget>

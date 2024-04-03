@@ -7,6 +7,7 @@
 #include <QIODevice>
 #include <QAudio>
 #include <QPalette>
+#include <QLineEdit>
 
 #include "rtc/rtc.h"
 
@@ -29,6 +30,7 @@ Widget::Widget(QWidget *parent)
     source->start(buffer);
 
     ui->setupUi(this);
+    connect(peer, &Peer::variableChanged, this->ui->message_display, &QTextBrowser::setText);
 }
 
 Widget::~Widget()
@@ -49,12 +51,6 @@ void Widget::on_show_sdp_clicked()
         peer->send_track->onOpen([]() {
             cout<<"send track opened"<<endl;
         });
-
-        peer->send_track->onOpen([this](){
-            cout<<"send track is open, trying to send smth"<<endl;
-            peer->send_track->send("daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        });
-
 
         peer->send_track->onMessage([](std::variant<rtc::binary, rtc::string> message) {
             cout<<"received from send!"<<endl;
@@ -103,12 +99,6 @@ void Widget::on_show_sdp_clicked()
     peer->printLog();
 }
 
-
-void Widget::on_textEdit_textChanged()
-{
-}
-
-
 void Widget::on_connect_peer_clicked()
 {
     peer->setRemoteDescription(ui->textEdit->toPlainText().toStdString());
@@ -124,24 +114,18 @@ void Widget::on_send_text_clicked()
 void Widget::on_send_audio_clicked()
 {
     // while(1){
-        // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         cout<<"buffer opened:"<<buffer->open(QIODevice::ReadWrite)<<endl;
         QByteArray audioData = buffer->readAll();
         if (!audioData.isEmpty()) {
             cout<<"sending audio!"<<audioData.size()<<endl;
-            std::string rtpPacket(audioData.begin(), audioData.begin() + 200);
+            std::string rtpPacket(audioData.begin(), audioData.begin() + 1000);
 
             if (peer->send_track->isOpen())
                 cout<<"send is:"<<peer->send_track->send(std::move(rtpPacket))<<endl;
             else
                 cout<<"track not open"<<endl;
             buffer->buffer().clear();
+        }
     // }
-    }
 }
-
-void Widget::on_show_text_message_clicked()
-{
-    ui->message_display->setText(QString::fromStdString(peer->last_received_msg));
-}
-
