@@ -16,6 +16,7 @@ class Peer: public QObject{
 
 signals:
     void variableChanged(const QString& newValue);
+    void voiceReceived(rtc::binary voiceBin);
 
 private:
     int id;

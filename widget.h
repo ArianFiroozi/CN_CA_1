@@ -34,7 +34,11 @@ private slots:
 
     void on_send_audio_clicked();
 
+    void on_mute_unmute_clicked();
+
 private:
     Ui::Widget *ui;
+
+    void playAudio(rtc::binary voiceBin);
 };
 #endif // WIDGET_H

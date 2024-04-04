@@ -101,13 +101,14 @@ void Peer::createDataChannel(std::string name)
 
         receive_track->onMessage(
             [this](rtc::binary message) {
-                cout<<"msgbin"<<endl;
-                cout<< reinterpret_cast<const char *>(message.data())<<endl;
+                cout<<"in receive: binary message recieved"<<endl;
+                // cout<< reinterpret_cast<const char *>(message.data())<<endl;
+                emit voiceReceived(message);
             },
             [](rtc::string msg){
                 cout<<"msgstr: "<<msg<<endl;
             });
-    });   
+    });
 }
 
 void Peer::sendMsg(std::string msg)
