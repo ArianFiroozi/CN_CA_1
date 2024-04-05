@@ -13,3 +13,8 @@ UI of this application consists of two text boxes that one shows SDP of the curr
 Both users should wait until 'peer is connected' message to show up which indicate that everything is set up and they can start communicating. Messages can be sent by typing it in the Msg textbox and pressing send button.
 
 ![image](https://github.com/chosterm/CN_CA_1/assets/126232660/44d42020-5954-4cbe-a2bf-a2bd46e436d2)
+
+## Audio Transfer
+
+Using QAudioSource, the audio is received from user microphone, and using the Mute button microphon can mutted and unmutted on command. This part works fine as the microphone icon appears by OS when send audio is clicked and disappears when mute is pressed; the other peer gets the message and tries to play it but no audio is played which is a bug that I could not fix until the deadline.
+
