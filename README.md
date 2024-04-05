@@ -48,6 +48,9 @@ Security protocols for metadata and signaling should be specified by developers.
 
 ## Resources:
 https://github.com/paullouisageneau/libdatachannel
+
 https://www.techtarget.com/searchunifiedcommunications/definition/WebRTC-Web-Real-Time-Communications
+
 https://trtc.io/blog/details/what-is-webrtc
+
 https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API
