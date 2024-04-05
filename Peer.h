@@ -19,13 +19,12 @@ signals:
     void voiceReceived(rtc::binary voiceBin);
 
 private:
-    int id;
     rtc::Configuration config;
     shared_ptr<rtc::DataChannel> incomingDc;
     int state;
 
-    void logPc(rtc::PeerConnection *pc, int id);
-    void logDc(shared_ptr<rtc::DataChannel> dc, int id);
+    void logPc(rtc::PeerConnection *pc);
+    void logDc(shared_ptr<rtc::DataChannel> dc);
 
 public:
     shared_ptr<rtc::DataChannel> dc;
@@ -33,7 +32,7 @@ public:
     std::shared_ptr<rtc::Track> send_track;
     std::shared_ptr<rtc::Track> receive_track;
 
-    Peer(int _id, QObject *parent = Q_NULLPTR);
+    Peer(QObject *parent = Q_NULLPTR);
     ~Peer();
 
     void printLog();

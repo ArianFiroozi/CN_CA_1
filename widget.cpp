@@ -18,7 +18,7 @@ Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
-    peer = new Peer(1);
+    peer = new Peer();
     buffer = new QBuffer();
 
     QAudioFormat format;
@@ -27,7 +27,7 @@ Widget::Widget(QWidget *parent)
     format.setSampleFormat(QAudioFormat::UInt8);
     source = new QAudioSource(format, this);
     cout<<"buffer opened:"<<buffer->open(QIODevice::ReadWrite)<<endl;
-    cout<<"buffer state"<<buffer->isOpen()<<endl;
+    cout<<"buffer state: "<<buffer->isOpen()<<endl;
     source->start(buffer);
 
     ui->setupUi(this);
@@ -40,59 +40,61 @@ Widget::~Widget()
     delete ui;
 }
 
+void Widget::create_first_track()
+{
+    const rtc::SSRC ssrc = 42;
+    rtc::Description::Audio media("audio", rtc::Description::Direction::SendRecv);
+    media.addSSRC(ssrc, "audio-send");
+
+    peer->send_track = peer->pc->addTrack(media);
+    peer->send_track->onOpen([]() {
+        cout<<"send track opened"<<endl;
+    });
+
+    peer->send_track->onMessage([](std::variant<rtc::binary, rtc::string> message) {
+        cout<<"received from send!"<<endl;
+    });
+
+    rtc::Description::Audio rec_media("audio", rtc::Description::Direction::SendRecv);
+    rec_media.addSSRC(ssrc, "audio-rec");
+
+    peer->receive_track = peer->pc->addTrack(rec_media);
+    peer->receive_track->onOpen([]() {
+        cout<<"rec track opened"<<endl;
+    });
+
+    peer->receive_track->onMessage(
+        [this](rtc::binary message) {
+            cout<<"binary message recieved"<<endl;
+            playAudio(message);
+        },
+        [](rtc::string msg){
+            cout<<"msgstr"<<msg<<endl;
+        });
+}
+
+void Widget::create_second_track()
+{
+    const rtc::SSRC ssrc = 42;
+    rtc::Description::Audio rec_media("audio", rtc::Description::Direction::SendRecv);
+    rec_media.addSSRC(ssrc, "audio-receive");
+
+    peer->send_track = peer->pc->addTrack(rec_media);
+    auto session = std::make_shared<rtc::RtcpReceivingSession>();
+    peer->send_track->setMediaHandler(session);
+}
 
 void Widget::on_show_sdp_clicked()
 {
 
-    if (ui->connect_peer->isEnabled()){
-        const rtc::SSRC ssrc = 42;
-        rtc::Description::Audio media("audio", rtc::Description::Direction::SendRecv);
-        media.addSSRC(ssrc, "audio-send");
-
-        peer->send_track = peer->pc->addTrack(media);
-        peer->send_track->onOpen([]() {
-            cout<<"send track opened"<<endl;
-        });
-
-        peer->send_track->onMessage([](std::variant<rtc::binary, rtc::string> message) {
-            cout<<"received from send!"<<endl;
-        });
-        /////
-        rtc::Description::Audio rec_media("audio", rtc::Description::Direction::SendRecv);
-        rec_media.addSSRC(ssrc, "audio-rec");
-
-        peer->receive_track = peer->pc->addTrack(rec_media);
-        peer->receive_track->onOpen([]() {
-            cout<<"rec track opened"<<endl;
-        });
-
-        peer->receive_track->onOpen([this](){
-            cout<<"rec track is open"<<endl;
-        });
-
-
-        peer->receive_track->onMessage(
-            [this](rtc::binary message) {
-                cout<<"binary message recieved"<<endl;
-                playAudio(message);
-            },
-            [](rtc::string msg){
-                cout<<"msgstr"<<msg<<endl;
-            });
-    }
+    if (ui->connect_peer->isEnabled())
+        create_first_track();
 
     peer->createDataChannel("mydc");
     peer->setLocalToOffer();
 
-    if (!ui->connect_peer->isEnabled()){ ////?
-        const rtc::SSRC ssrc = 42;
-        rtc::Description::Audio rec_media("audio", rtc::Description::Direction::SendRecv);
-        rec_media.addSSRC(ssrc, "audio-receive");
-
-        peer->send_track = peer->pc->addTrack(rec_media);
-        auto session = std::make_shared<rtc::RtcpReceivingSession>();
-        peer->send_track->setMediaHandler(session);
-    }
+    if (!ui->connect_peer->isEnabled())
+        create_second_track();
 
     string mySdp = peer->getSdp();
     ui->textBrowser->setText(QString::fromUtf8(mySdp.c_str()));

@@ -40,5 +40,7 @@ private:
     Ui::Widget *ui;
 
     void playAudio(rtc::binary voiceBin);
+    void create_first_track();
+    void create_second_track();
 };
 #endif // WIDGET_H

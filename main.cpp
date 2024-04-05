@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     Widget w;
     w.setWindowTitle("CN CA1");
-    // rtcInitLogger(rtcLogLevel::RTC_LOG_DEBUG, NULL); //uncomment for detailed log
-
+    // uncomment for detailed log
+    // rtcInitLogger(rtcLogLevel::RTC_LOG_DEBUG, NULL);
     w.show();
     return a.exec();
 }
